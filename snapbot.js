@@ -5,6 +5,7 @@ puppeteer.use(Stealth());
 
 import fs from "fs";
 import fsPromise from "fs/promises";
+import path from "path";
 
 function delay(time) {
   return new Promise(function (resolve) {
@@ -26,20 +27,11 @@ export default class SnapBot {
         // executablePath: "/usr/bin/google-chrome",  // for docker
       };
       this.browser = await puppeteer.launch(options);
-
-      if (cookiefile) {
-        try {
-          const cookiesString = fs.readFileSync(
-            `./${cookiefile}-cookies.json`,
-            "utf-8"
-          );
-          const cookies = JSON.parse(cookiesString);
-          await this.browser.setCookie(...cookies);
-          console.log("Cookies set");
-        } catch (error) {
-          console.error("Error in using cookies", error);
-        }
-      }
+      const cookiesPath = cookiefile
+        ? (cookiefile.includes("/") || cookiefile.includes("\\")
+            ? cookiefile
+            : path.join(process.env.COOKIES_DIR || path.resolve(process.cwd(), "data", "cookies"), `${cookiefile}-cookies.json`))
+        : null;
 
       const context = this.browser.defaultBrowserContext();
 
@@ -58,6 +50,19 @@ export default class SnapBot {
       await this.page.setUserAgent(
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
       );
+
+      // Load cookies if available (before navigation)
+      if (cookiesPath && fs.existsSync(cookiesPath)) {
+        try {
+          const cookiesString = fs.readFileSync(cookiesPath, "utf-8");
+          const cookies = JSON.parse(cookiesString);
+          const normalized = cookies.map((c) => (c.url || c.domain ? c : { ...c, url: "https://web.snapchat.com" }));
+          await this.page.setCookie(...normalized);
+          console.log("Cookies set from:", cookiesPath);
+        } catch (error) {
+          console.error("Error applying cookies from file", cookiesPath, error);
+        }
+      }
 
       //gets the version
       this.page.on("console", (msg) => {
@@ -82,7 +87,8 @@ export default class SnapBot {
         }
       });
 
-      await this.page.goto("https://www.snapchat.com/?original_referrer=none");
+      // Go directly to Snapchat Web app
+      await this.page.goto("https://web.snapchat.com/");
     } catch (error) {
       console.error(`Error while Starting Snapchat : ${error}`);
     }
@@ -94,23 +100,50 @@ export default class SnapBot {
       throw new Error("Credentials cannot be empty");
     }
     try {
-      // Enter username
-      const defaultLoginBtn = await this.page.$("#ai_input");
+      // Ensure we're on the login screen
+      const loginFieldSelector = 'input[name="accountIdentifier"], #ai_input';
+
+      // short wait for network to settle
+      try {
+        await this.page.waitForNetworkIdle({ idleTime: 500, timeout: 5000 });
+      } catch (_) {}
+
+      let loginField = await this.page.$(loginFieldSelector);
+
+      if (!loginField) {
+        // Try clicking a visible "Log in" button/link if present
+        const loginCandidates = await this.page.$x(
+          "//a[normalize-space()='Log in' or normalize-space()='Log In'] | //button[normalize-space()='Log in' or normalize-space()='Log In']"
+        );
+        if (loginCandidates && loginCandidates.length > 0) {
+          console.log("Found 'Log in' button/link. Clicking...");
+          await loginCandidates[0].click();
+          try {
+            await this.page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 30000 });
+          } catch (_) {}
+        } else {
+          // Fallback: go straight to accounts login
+          console.log("Directing to accounts login page...");
+          await this.page.goto("https://accounts.snapchat.com/accounts/v2/login", { waitUntil: 'domcontentloaded' });
+        }
+
+        await this.page.waitForSelector(loginFieldSelector, { visible: true, timeout: 30000 });
+        loginField = await this.page.$(loginFieldSelector);
+      }
+
+      // Enter username into the appropriate field
       const loginBtn = await this.page.$('input[name="accountIdentifier"]');
-
+      const defaultLoginBtn = await this.page.$("#ai_input");
+      console.log("Entering username...");
       if (loginBtn) {
-        this.page.waitForNetworkIdle();
-        console.log("Entering username...");
-        await this.page.type('input[name="accountIdentifier"]', username, {
-          delay: 100,
-        });
-      }
-      if (defaultLoginBtn) {
-        console.log("Entering username...");
-        await this.page.type("#ai_input", username, { delay: 100 });
+        await this.page.type('input[name="accountIdentifier"]', username, { delay: 100 });
+      } else if (defaultLoginBtn) {
+        await this.page.type('#ai_input', username, { delay: 100 });
       }
 
-      await this.page.click("button[type='submit']");
+      // Submit username (some flows have a single submit button)
+      const submitBtn = await this.page.$("button[type='submit']");
+      if (submitBtn) await submitBtn.click();
     } catch (e) {
       console.log("Username field error:", e);
     }
@@ -145,14 +178,67 @@ export default class SnapBot {
     await delay(1000);
   }
 
-  async isLogged() {
-    const defaultLoginBtn = await this.page.$("#ai_input");
-    const loginBtn = await this.page.$('input[name="accountIdentifier"]');
+  async isLogged(timeout = 20000) {
+    // Robust detection: wait for either login form or app UI elements
+    const appSelector =
+      "#downshift-1-toggle-button, div.ReactVirtualized__Grid__innerScrollContainer, button[title=\"View friend requests\"]";
+    const loginSelector =
+      'input[name="accountIdentifier"], #ai_input, #password';
 
-    if (defaultLoginBtn || loginBtn) {
-      return false;
+    const start = Date.now();
+    console.log("Detecting authentication state...");
+    while (Date.now() - start < timeout) {
+      try {
+        const appEl = await this.page.$(appSelector);
+        if (appEl) {
+          console.log("Detected Snapchat Web UI – logged in");
+          return true;
+        }
+        const loginEl = await this.page.$(loginSelector);
+        if (loginEl) {
+          console.log("Detected login form – login required");
+          return false;
+        }
+      } catch (e) {
+        // ignore transient errors while DOM updates
+      }
+      await delay(500);
     }
-    return true;
+
+    // Fallback: infer from URL if selectors did not appear in time
+    const url = this.page.url();
+    console.warn(
+      `Auth state uncertain after timeout. Current URL: ${url}. Assuming not logged in if login selectors appear later.`
+    );
+    const appElFinal = await this.page.$(appSelector);
+    return Boolean(appElFinal);
+  }
+
+  async ensureLoggedIn(credentials, options = { handlePopup: true, retry: 0 }) {
+    const { retry = 0, handlePopup = true } = options || {};
+    let logged = await this.isLogged();
+    if (!logged) {
+      await this.login(credentials);
+      await delay(1000);
+      if (handlePopup) {
+        try {
+          await this.handlePopup();
+        } catch (_) {}
+      }
+      logged = await this.isLogged();
+      if (!logged && retry > 0) {
+        console.log("Auth still not confirmed, retrying login...");
+        return this.ensureLoggedIn(credentials, { handlePopup, retry: retry - 1 });
+      }
+    } else {
+      console.log("Bot is already Logged in");
+      if (handlePopup) {
+        try {
+          await this.handlePopup();
+        } catch (_) {}
+      }
+    }
+    return logged;
   }
 
   async handlePopup() {
@@ -316,6 +402,62 @@ export default class SnapBot {
     }
   }
 
+  async recordVideo({ caption, durationMs = 5000 } = {}) {
+    try {
+      // Ensure capture UI is visible
+      const captureButtonSelector = "button.FBYjn.gK0xL.A7Cr_.m3ODJ";
+      let captureButton = await this.page.$(captureButtonSelector);
+
+      if (!captureButton) {
+        const svgButtonSelector = "button.qJKfS";
+        await delay(1000);
+        try {
+          const isSVGbuttonFound = await this.page.waitForSelector(svgButtonSelector, {
+            visible: true,
+            timeout: 15000,
+          });
+          if (isSVGbuttonFound) {
+            await this.page.click(svgButtonSelector);
+            await delay(1000);
+          }
+        } catch (_) {}
+
+        captureButton = await this.page.waitForSelector(captureButtonSelector, {
+          visible: true,
+          timeout: 15000,
+        });
+      }
+
+      // Hold mouse on capture button to record
+      const box = await captureButton.boundingBox();
+      if (!box) throw new Error("Capture button not visible for recording");
+      const x = box.x + box.width / 2;
+      const y = box.y + box.height / 2;
+
+      await this.page.mouse.move(x, y);
+      await this.page.mouse.down();
+      await delay(durationMs);
+      await this.page.mouse.up();
+      console.log(`🎥 Recorded video for ~${durationMs}ms`);
+
+      await delay(1500);
+
+      // Add caption if provided (same UI flow as captureSnap)
+      if (caption) {
+        const captionButtonSelector = 'button.eUb32[title="Add a caption"]';
+        await this.page.waitForSelector(captionButtonSelector, { visible: true });
+        await this.page.click(captionButtonSelector);
+        await delay(500);
+        const textareaSelector = 'textarea.B9QiX[aria-label="Caption Input"]';
+        await this.page.waitForSelector(textareaSelector, { visible: true });
+        await this.page.type(textareaSelector, caption, { delay: 100 });
+        console.log("✅ Caption added to video");
+      }
+    } catch (error) {
+      console.error("❌ Error in recording video:", error);
+    }
+  }
+
   async send(person) {
     try {
       const button = await this.page.$("button.YatIx.fGS78.eKaL7.Bnaur"); //updated this
@@ -359,6 +501,73 @@ export default class SnapBot {
     }
   }
 
+  // Select and send to specific recipients by display name
+  async sendToRecipients(names = []) {
+    if (!Array.isArray(names) || names.length === 0) {
+      throw new Error("names array is required for sendToRecipients");
+    }
+    // Open the send overlay
+    const button = await this.page.$("button.YatIx.fGS78.eKaL7.Bnaur");
+    if (button) {
+      await button.click();
+    }
+    await delay(1000);
+
+    const lower = names.map((n) => String(n).trim().toLowerCase());
+    // Wait for list of recipients and click matches
+    await this.page.waitForSelector("div.ReactVirtualized__Grid__innerScrollContainer");
+    const listItems = await this.page.$$("div[role='listitem']");
+
+    for (const listItem of listItems) {
+      const titleSpan = await listItem.$("span[id^='title-']");
+      if (!titleSpan) continue;
+      const name = await this.page.evaluate((el) => el.textContent.trim(), titleSpan);
+      if (lower.includes(name.trim().toLowerCase())) {
+        const isVisible = await listItem.evaluate((el) => el.offsetWidth > 0 && el.offsetHeight > 0);
+        if (isVisible) await listItem.click();
+      }
+    }
+
+    const sendButton = await this.page.$("button[type='submit']");
+    if (!sendButton) throw new Error("Send button not found");
+    await sendButton.click();
+    await delay(3000);
+  }
+
+  // Send a text message (string or string[]) to specific recipients by display name
+  async sendTextToRecipients(names = [], message = '') {
+    if (!Array.isArray(names) || names.length === 0) {
+      throw new Error('names array is required for sendTextToRecipients');
+    }
+    const msgs = Array.isArray(message) ? message : [String(message)];
+
+    await this.page.waitForSelector("div.ReactVirtualized__Grid__innerScrollContainer");
+    const lower = names.map((n) => String(n).trim().toLowerCase());
+    const listItems = await this.page.$$("div[role='listitem']");
+
+    for (const listItem of listItems) {
+      const titleSpan = await listItem.$("span[id^='title-']");
+      if (!titleSpan) continue;
+      const displayName = await this.page.evaluate((el) => el.textContent.trim(), titleSpan);
+      if (!lower.includes(displayName.toLowerCase())) continue;
+
+      // Open chat
+      await titleSpan.click();
+      await delay(500);
+
+      for (const msg of msgs) {
+        await this.page.waitForSelector('div[role="textbox"].euyIb');
+        await this.page.type('div[role="textbox"].euyIb', msg, { delay: 80 });
+        await this.page.keyboard.press('Enter');
+        await delay(200);
+      }
+
+      // Go back to the list (click title again)
+      try { await titleSpan.click(); } catch (_) {}
+      await delay(300);
+    }
+  }
+
   async closeBrowser() {
     await delay(5000);
     await this.browser.close();
@@ -389,30 +598,47 @@ export default class SnapBot {
     await requests.click();
   }
 
-  async listRecipients() {
-    await this.page.waitForSelector(
-      "div.ReactVirtualized__Grid__innerScrollContainer"
-    );
-    const lists = await this.page.$$("div[role='listitem']");
+  async listRecipients(limit = undefined) {
+    await this.page.waitForSelector("div.ReactVirtualized__Grid");
+    await this.page.waitForSelector("div.ReactVirtualized__Grid__innerScrollContainer");
+    const grid = await this.page.$("div.ReactVirtualized__Grid");
+
+    const seen = new Set();
     const data = [];
 
-    for (const listItem of lists) {
-      const titleSpan = await listItem.$("span[id^='title-']");
-      if (titleSpan) {
+    const scrapeVisible = async () => {
+      const lists = await this.page.$$("div[role='listitem']");
+      for (const listItem of lists) {
+        const titleSpan = await listItem.$("span[id^='title-']");
+        if (!titleSpan) continue;
         let id = await this.page.evaluate((el) => el.id, titleSpan);
-        const name = await this.page.evaluate(
-          (el) => el.textContent.trim(),
-          titleSpan
-        );
+        const name = await this.page.evaluate((el) => el.textContent.trim(), titleSpan);
         id = id.replace(/^title-/, "");
-        data.push({ id, name });
+        if (!seen.has(id)) {
+          seen.add(id);
+          data.push({ id, name });
+          if (limit && data.length >= limit) return true;
+        }
       }
+      return false;
+    };
 
-      //status
+    let stable = 0;
+    let lastCount = 0;
+    let iterations = 0;
+    // Initial scrape
+    let done = await scrapeVisible();
+    while (!done && iterations < 50 && stable < 3) {
+      iterations += 1;
+      await grid.evaluate((el) => { el.scrollBy(0, el.clientHeight); });
+      await delay(500);
+      done = await scrapeVisible();
+      if (data.length === lastCount) stable += 1; else stable = 0;
+      lastCount = data.length;
+      if (limit && data.length >= limit) break;
     }
 
-    // console.log(data);
-    return data;
+    return limit ? data.slice(0, limit) : data;
   }
 
   async sendMessage(obj) {
@@ -464,12 +690,12 @@ export default class SnapBot {
 
   async saveCookies(username) {
     try {
-      const cookies = await this.browser.cookies();
-      fs.writeFileSync(
-        `./${username}-cookies.json`,
-        JSON.stringify(cookies, null, 2)
-      );
-      console.log("cookies saved for : ", username);
+      const dir = process.env.COOKIES_DIR || path.resolve(process.cwd(), "data", "cookies");
+      try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {}
+      const cookies = await this.page.cookies("https://web.snapchat.com");
+      const filePath = path.join(dir, `${username}-cookies.json`);
+      fs.writeFileSync(filePath, JSON.stringify(cookies, null, 2));
+      console.log("cookies saved to:", filePath);
     } catch (error) {
       console.error("Error in saving cookies", error);
     }
@@ -477,9 +703,12 @@ export default class SnapBot {
 
   async useCookies(username) {
     try {
-      const cookiesString = fs.readFileSync(`./${username}-cookies.json`);
+      const dir = process.env.COOKIES_DIR || path.resolve(process.cwd(), "data", "cookies");
+      const filePath = path.join(dir, `${username}-cookies.json`);
+      const cookiesString = fs.readFileSync(filePath, "utf-8");
       const cookies = JSON.parse(cookiesString);
-      await this.browser.setCookie(...cookies);
+      const normalized = cookies.map((c) => (c.url || c.domain ? c : { ...c, url: "https://web.snapchat.com" }));
+      await this.page.setCookie(...normalized);
     } catch (error) {
       console.error("Error in using cookies", error);
     }
@@ -693,6 +922,55 @@ export default class SnapBot {
   }
 
   // add custom methods
+  async sendVideoTo(category, videoPathY4M, audioPathWAV, caption = null, options = {}) {
+    const {
+      durationMs = 5000,
+      headless = true,
+      userDataDir = null,
+      username = process.env.USER_NAME,
+      password = process.env.USER_PASSWORD,
+      recipients = null,
+    } = options || {};
+
+    if (!category) throw new Error("category is required");
+    if (!videoPathY4M) throw new Error("videoPathY4M is required");
+    if (!audioPathWAV) throw new Error("audioPathWAV is required");
+    if (!fs.existsSync(videoPathY4M)) throw new Error(`Video file not found: ${videoPathY4M}`);
+    if (!fs.existsSync(audioPathWAV)) throw new Error(`Audio file not found: ${audioPathWAV}`);
+
+    const args = [
+      "--start-maximized",
+      "--force-device-scale-factor=1",
+      "--allow-file-access-from-files",
+      "--use-fake-ui-for-media-stream",
+      "--enable-media-stream",
+      "--use-fake-device-for-media-stream",
+      `--use-file-for-fake-video-capture=${videoPathY4M}`,
+      `--use-file-for-fake-audio-capture=${audioPathWAV}`,
+    ];
+    const launchOptions = { headless, args };
+    if (userDataDir) launchOptions.userDataDir = userDataDir;
+
+    try {
+      await this.launchSnapchat(launchOptions);
+      let logged = false;
+      if (username && password) {
+        logged = await this.ensureLoggedIn({ username, password }, { handlePopup: true, retry: 1 });
+      } else {
+        logged = await this.isLogged();
+      }
+      if (!logged) throw new Error("Login not confirmed");
+
+      await this.recordVideo({ caption, durationMs });
+    if (Array.isArray(recipients) && recipients.length > 0) {
+      await this.sendToRecipients(recipients);
+    } else {
+      await this.send(category);
+    }
+    } finally {
+      try { await this.closeBrowser(); } catch (_) {}
+    }
+  }
   static extend(methods) {
     Object.assign(SnapBot.prototype, methods);
   }

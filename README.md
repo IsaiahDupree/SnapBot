@@ -109,6 +109,39 @@ SnapBot provides a comprehensive set of methods to interact with Snapchat:
 For detailed information on each method and advanced usage, please refer to the [docs.md](https://github.com/Emmanuel-Rods/SnapBot/blob/main/docs.md) file in the repository.
 
 
+### 🧭 Architecture & API (Project Plan)
+
+See `docs/ARCHITECTURE.md` for the comprehensive plan covering architecture, REST API, database schema, logging, Docker usage, configuration, implementation status, and next steps.
+
+Local copy: [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)
+
+
+### 🎬 Media Preparation (outside container)
+
+The container does not perform media conversion. Prepare inputs beforehand:
+
+```bash
+# Convert MP4 to Y4M video (4:2:0)
+ffmpeg -y -i input.mp4 -pix_fmt yuv420p -f yuv4mpegpipe output.y4m
+
+# Extract WAV audio (48kHz stereo)
+ffmpeg -y -i input.mp4 -vn -ac 2 -ar 48000 -f wav output.wav
+```
+
+Mount the prepared files into the container under `/app/media`.
+
+
+### 🗂️ Docker Volumes
+
+The Docker image defines the following mount points:
+
+- `/app/media` — media files to send (Y4M/WAV)
+- `/app/logs` — JSON logs (pino)
+- `/app/data/cookies` — persistent cookies directory (configurable via `COOKIES_DIR`)
+
+Example run command is available in `docs/ARCHITECTURE.md`.
+
+
 ### 🤝 Contributing
 
 We welcome contributions!

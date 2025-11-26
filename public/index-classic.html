@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SnapBot Dashboard</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>SnapBot Dashboard</h1>
+    <div class="actions">
+      <label class="theme-label">Theme
+        <select id="themeSelect">
+          <option value="light" selected>Light</option>
+          <option value="dark">Dark</option>
+          <option value="system">System</option>
+        </select>
+      </label>
+      <label class="theme-label">Density
+        <select id="densitySelect">
+          <option value="comfortable" selected>Comfortable</option>
+          <option value="compact">Compact</option>
+        </select>
+      </label>
+      <button id="refreshBtn" title="Refresh data">Refresh</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card" id="healthCard">
+      <h2>Health</h2>
+      <div id="health"></div>
+    </section>
+
+    <section class="card" id="statsCard">
+      <h2>Stats</h2>
+      <div id="stats"></div>
+    </section>
+
+    <section class="card" id="jobsCard">
+      <h2>Recent Jobs</h2>
+      <div class="table-wrap">
+        <table id="jobsTable">
+          <thead>
+            <tr>
+              <th>Id</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Updated</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card" id="filtersCard">
+      <h2>Filters (Whitelist / Blacklist)</h2>
+      <div class="filters">
+        <div>
+          <h3>Whitelist</h3>
+          <ul id="whitelist"></ul>
+        </div>
+        <div>
+          <h3>Blacklist</h3>
+          <ul id="blacklist"></ul>
+        </div>
+      </div>
+      <form id="filterForm" class="form-row">
+        <label>
+          Mode
+          <select name="mode">
+            <option value="whitelist">Whitelist</option>
+            <option value="blacklist">Blacklist</option>
+          </select>
+        </label>
+        <label class="grow">
+          Value (Display Name)
+          <input name="value" placeholder="e.g. Team Snapchat" required />
+        </label>
+        <button type="submit">Add</button>
+      </form>
+    </section>
+
+    <section class="card" id="endpointsCard">
+      <h2>Endpoints</h2>
+      <div class="table-wrap">
+        <table id="endpointsTable">
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Path</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card" id="recipientsCard">
+      <h2>Recipients</h2>
+      <form id="recipientsForm" class="form-row">
+        <label>
+          Headless
+          <select name="headless">
+            <option value="true">true</option>
+            <option value="false" selected>false</option>
+          </select>
+        </label>
+        <label>
+          Limit
+          <input type="number" name="limit" value="100" min="1" />
+        </label>
+        <label class="grow">
+          userDataDir (optional)
+          <input name="userDataDir" placeholder="C:\\Users\\...\\Chrome\\User Data\\Default" />
+        </label>
+        <button type="submit">Load Recipients</button>
+      </form>
+      <div class="table-wrap" style="margin-top:10px;">
+        <table id="recipientsTable">
+          <thead>
+            <tr>
+              <th>Id</th>
+              <th>Name</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="hint">Tip: Use userDataDir for a logged-in Chrome profile to avoid CAPTCHA.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>© SnapBot</span>
+  </footer>
+
+  <!-- Run Sample Modal -->
+  <div class="modal" id="runModal" hidden>
+    <div class="modal-dialog">
+      <header class="modal-header">
+        <h3 id="runModalTitle">Run Sample</h3>
+        <button class="modal-close" data-close>&times;</button>
+      </header>
+      <div class="modal-body">
+        <div class="form-row">
+          <label>
+            Method
+            <input id="runMethod" readonly />
+          </label>
+          <label class="grow">
+            Path
+            <input id="runPath" readonly />
+          </label>
+        </div>
+        <div class="warning" id="runWarning" hidden></div>
+        <div class="form-row">
+          <label class="grow">Payload (JSON)
+            <textarea id="runPayload" rows="10" spellcheck="false"></textarea>
+          </label>
+          <div>
+            <button id="copyPayloadBtn" type="button">Copy Payload</button>
+          </div>
+        </div>
+        <div class="form-row">
+          <pre id="runResult" class="pre" style="flex:1 1 auto;"></pre>
+          <div>
+            <button id="copyResultBtn" type="button">Copy Result</button>
+          </div>
+        </div>
+      </div>
+      <footer class="modal-footer">
+        <button data-close>Cancel</button>
+        <button id="runSendBtn" class="primary">Send</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Job Logs Modal -->
+  <div class="modal" id="logsModal" hidden>
+    <div class="modal-dialog">
+      <header class="modal-header">
+        <h3>Job Logs</h3>
+        <button class="modal-close" data-close>&times;</button>
+      </header>
+      <div class="modal-body">
+        <div class="form-row">
+          <label class="grow">
+            Job ID
+            <input id="logsJobId" readonly />
+          </label>
+        </div>
+        <pre id="logsStream" class="pre" style="max-height:340px;"></pre>
+      </div>
+      <footer class="modal-footer">
+        <button id="logsExportBtn">Export</button>
+        <button data-close>Close</button>
+      </footer>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

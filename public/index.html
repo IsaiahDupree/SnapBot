@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="en" data-theme="light" data-density="comfortable">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SnapBot Dashboard</title>
+  <link rel="stylesheet" href="/modern.css" />
+</head>
+<body>
+  <a class="label" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">Skip to content</a>
+
+  <header class="topbar">
+    <h1>SnapBot Dashboard</h1>
+    <div class="actions">
+      <label class="label">Theme
+        <select id="themeSelect" class="select">
+          <option value="light" selected>Light</option>
+          <option value="dark">Dark</option>
+          <option value="system">System</option>
+        </select>
+      </label>
+      <label class="label">Density
+        <select id="densitySelect" class="select">
+          <option value="comfortable" selected>Comfortable</option>
+          <option value="compact">Compact</option>
+        </select>
+      </label>
+      <button id="refreshBtn" class="button" title="Refresh data">Refresh</button>
+    </div>
+
+  <!-- Recipient Picker Modal -->
+  <div class="modal" id="rpModal" hidden>
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="rpTitle">
+      <header class="modal-header">
+        <h3 id="rpTitle">Pick Recipients</h3>
+        <button class="modal-close" data-close aria-label="Close">&times;</button>
+      </header>
+      <div class="modal-body">
+        <div class="form-row">
+          <label class="grow">
+            <span class="label">Search</span>
+            <input id="rpSearch" placeholder="Type to filter..." />
+          </label>
+        </div>
+        <div class="table-wrap" style="margin-top:10px; max-height:360px; overflow:auto;">
+          <table id="rpTable">
+            <thead>
+              <tr>
+                <th style="width:40px;">Sel</th>
+                <th>Display Name</th>
+                <th>Id</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      <footer class="modal-footer">
+        <button id="rpAddBtn" class="button primary">Add Selected</button>
+        <button class="button" data-close>Close</button>
+      </footer>
+    </div>
+  </div>
+  </header>
+
+  <main id="main" class="container">
+    <div class="layout">
+      <aside class="side">
+        <nav aria-label="Sections">
+          <ul>
+            <li><a href="#healthCard">Health</a></li>
+            <li><a href="#statsCard">Stats</a></li>
+            <li><a href="#jobsCard">Jobs</a></li>
+            <li><a href="#jobsListCard">Jobs List</a></li>
+            <li><a href="#endpointsCard">Endpoints</a></li>
+            <li><a href="#filtersCard">Filters</a></li>
+            <li><a href="#recipientsCard">Recipients</a></li>
+            <li><a href="#callbacksCard">Callbacks</a></li>
+          </ul>
+        </nav>
+      </aside>
+      <div class="content">
+        <div class="grid">
+      <!-- Health -->
+      <section class="card" id="healthCard">
+        <div class="panel-header"><h2>Health</h2><span class="hint">Live service status</span></div>
+        <div id="health"></div>
+      </section>
+
+      <!-- Callbacks -->
+      <section class="card wide" id="callbacksCard">
+        <div class="panel-header"><h2>Callbacks</h2><span class="hint">Recent webhook deliveries</span></div>
+        <div class="form-row" style="margin-bottom:10px;">
+          <label>
+            <span class="label">Status</span>
+            <select id="callbacksStatus" class="select">
+              <option value="">All</option>
+              <option value="pending">pending</option>
+              <option value="delivered">delivered</option>
+              <option value="failed">failed</option>
+            </select>
+          </label>
+          <label class="grow">
+            <span class="label">Search</span>
+            <input id="callbacksSearch" placeholder="Search id, job id, url, error" />
+          </label>
+        </div>
+        <div class="table-wrap">
+          <table id="callbacksTable">
+            <thead>
+              <tr>
+                <th>Event Id</th>
+                <th>Job Id</th>
+                <th>Status</th>
+                <th>Attempts</th>
+                <th>Next Attempt</th>
+                <th>Updated</th>
+                <th>Last Error</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Stats -->
+      <section class="card" id="statsCard">
+        <div class="panel-header"><h2>Stats</h2><span class="hint">Today & 30‑day</span></div>
+        <div id="stats"></div>
+      </section>
+
+      <!-- Recent Jobs -->
+      <section class="card wide" id="jobsCard">
+        <div class="panel-header"><h2>Recent Jobs</h2><span class="hint">Newest first</span></div>
+        <div class="table-wrap">
+          <table id="jobsTable">
+            <thead>
+              <tr>
+                <th>Id</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Updated</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Jobs List (filters + paging) -->
+      <section class="card wide" id="jobsListCard">
+        <div class="panel-header"><h2>Jobs (List)</h2><span class="hint">Filter and page through jobs</span></div>
+        <div class="form-row" style="margin-bottom:10px; align-items:end;">
+          <label>
+            <span class="label">Status</span>
+            <select id="jobsFilterStatus" class="select">
+              <option value="">All</option>
+              <option value="queued">queued</option>
+              <option value="running">running</option>
+              <option value="failed">failed</option>
+              <option value="succeeded">succeeded</option>
+              <option value="cancelled">cancelled</option>
+            </select>
+          </label>
+          <label class="small">
+            <span class="label">Page size</span>
+            <select id="jobsPageSize" class="select">
+              <option value="10">10</option>
+              <option value="20" selected>20</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </label>
+          <div class="row">
+            <button id="jobsPrev" class="button">Prev</button>
+            <span id="jobsPageLabel" class="label">Page 1</span>
+            <button id="jobsNext" class="button">Next</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="jobsListTable">
+            <thead>
+              <tr>
+                <th>Id</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Updated</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Filters -->
+      <section class="card" id="filtersCard">
+        <h2>Filters</h2>
+        <div class="two-col">
+          <div>
+            <h3>Whitelist</h3>
+            <ul id="whitelist"></ul>
+          </div>
+          <div>
+            <h3>Blacklist</h3>
+            <ul id="blacklist"></ul>
+          </div>
+        </div>
+        <form id="filterForm" class="form-row" autocomplete="off">
+          <label>
+            <span class="label">Mode</span>
+            <select name="mode" class="select">
+              <option value="whitelist">Whitelist</option>
+              <option value="blacklist">Blacklist</option>
+            </select>
+          </label>
+          <label class="grow">
+            <span class="label">Value (Display Name)</span>
+            <input name="value" placeholder="e.g. Team Snapchat" required />
+          </label>
+          <div style="display:grid;align-content:end;">
+            <button type="submit" class="button primary">Add</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Send Snap -->
+      <section class="card wide" id="sendSnapCard">
+        <div class="panel-header"><h2>Send Snap</h2><span class="hint">Send an image snap with a custom caption to recipients</span></div>
+        <form id="sendSnapForm" class="form-row" autocomplete="off">
+          <label class="grow">
+            <span class="label">Caption</span>
+            <input name="caption" placeholder="e.g. Hello from SnapBot" required />
+          </label>
+          <label class="grow">
+            <span class="label">Recipients (comma or newline separated)</span>
+            <textarea name="recipientsText" rows="3" placeholder="Alice, Bob"></textarea>
+          </label>
+          <label>
+            <span class="label">Category (optional)</span>
+            <input name="category" list="snapCategories" placeholder="BestFriends" />
+          </label>
+          <label class="grow">
+            <span class="label">Image Path (optional)</span>
+            <input name="imagePath" placeholder="C:\\path\\to\\image.png" />
+          </label>
+          <label>
+            <span class="label">Caption Position (optional)</span>
+            <input type="number" name="captionPosition" min="0" max="100" />
+          </label>
+          <label>
+            <span class="label">Headless</span>
+            <select name="headless" class="select">
+              <option value="true" selected>true</option>
+              <option value="false">false</option>
+            </select>
+          </label>
+          <label class="grow">
+            <span class="label">userDataDir (optional)</span>
+            <input name="userDataDir" placeholder="C:\\Users\\...\\Chrome\\User Data\\Default" />
+          </label>
+          <label class="grow">
+            <span class="label">callbackUrl (optional)</span>
+            <input name="callbackUrl" placeholder="https://your.webhook/endpoint" />
+          </label>
+          <div style="display:grid;align-content:end;">
+            <button type="submit" class="button primary">Send Snap</button>
+          </div>
+        </form>
+        <p class="hint">If no recipients are provided, filters (whitelist/blacklist) will be applied to determine recipients from your known list.</p>
+        <datalist id="snapCategories">
+          <option value="BestFriends"></option>
+        </datalist>
+      </section>
+
+      <!-- Send Text -->
+      <section class="card wide" id="sendTextCard">
+        <div class="panel-header"><h2>Send Text</h2><span class="hint">Send chat messages to recipients</span></div>
+        <form id="sendTextForm" class="form-row" autocomplete="off">
+          <label class="grow">
+            <span class="label">Recipients (comma or newline separated)</span>
+            <textarea name="recipientsText" rows="3" placeholder="Alice, Bob" required></textarea>
+          </label>
+          <label class="grow">
+            <span class="label">Message</span>
+            <textarea name="messageText" rows="4" placeholder="Type your message here... (use multiple lines for multiple messages)"></textarea>
+          </label>
+          <label>
+            <span class="label">Headless</span>
+            <select name="headless" class="select">
+              <option value="true" selected>true</option>
+              <option value="false">false</option>
+            </select>
+          </label>
+          <label class="grow">
+            <span class="label">userDataDir (optional)</span>
+            <input name="userDataDir" placeholder="C:\\Users\\...\\Chrome\\User Data\\Default" />
+          </label>
+          <label class="grow">
+            <span class="label">callbackUrl (optional)</span>
+            <input name="callbackUrl" placeholder="https://your.webhook/endpoint" />
+          </label>
+          <div style="display:grid;align-content:end;">
+            <button type="submit" class="button primary">Send Text</button>
+          </div>
+        </form>
+        <div class="row" style="margin-top:6px; align-items:center;">
+          <span class="label">Recent</span>
+          <div id="recentRecipients" class="row" style="gap:6px;"></div>
+          <span class="spacer"></span>
+          <button id="openRecipientPicker" class="button">Quick Pick</button>
+        </div>
+        <p class="hint">Tip: One message per line sends an array of messages in sequence.</p>
+      </section>
+
+      <!-- Endpoints -->
+      <section class="card wide" id="endpointsCard">
+        <div class="panel-header"><h2>Endpoints</h2><span class="hint">HTTP API</span></div>
+        <div class="table-wrap">
+          <table id="endpointsTable">
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Path</th>
+                <th>Description</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Recipients -->
+      <section class="card wide" id="recipientsCard">
+        <div class="panel-header"><h2>Recipients</h2><span class="hint">Load from an existing Chrome profile for fewer CAPTCHAs</span></div>
+        <form id="recipientsForm" class="form-row" autocomplete="off">
+          <label>
+            <span class="label">Headless</span>
+            <select name="headless" class="select">
+              <option value="true">true</option>
+              <option value="false" selected>false</option>
+            </select>
+          </label>
+          <label>
+            <span class="label">Limit</span>
+            <input type="number" name="limit" value="100" min="1" />
+          </label>
+          <label class="grow">
+            <span class="label">userDataDir (optional)</span>
+            <input name="userDataDir" placeholder="C:\\Users\\...\\Chrome\\User Data\\Default" />
+          </label>
+          <div style="display:grid;align-content:end;">
+            <button type="submit" class="button primary">Load Recipients</button>
+          </div>
+        </form>
+        <div class="row" style="margin-top:8px;">
+          <button id="initAccountBtn" class="button">Initialize Account</button>
+          <button id="seedRecipientsBtn" class="button primary">Seed Recipients</button>
+          <button id="initAndSeedBtn" class="button">Initialize &amp; Seed</button>
+        </div>
+        <div class="row" style="margin-top:6px;">
+          <span id="initStatus" class="badge">Init: —</span>
+          <span id="seedStatus" class="badge">Seed: —</span>
+        </div>
+        <div class="row" style="margin-top:6px;">
+          <span id="recipientsStatus" class="hint"></span>
+          <span class="spacer"></span>
+          <label class="small">
+            <span class="label">Page size</span>
+            <select id="recPageSize" class="select">
+              <option value="25">25</option>
+              <option value="50" selected>50</option>
+              <option value="100">100</option>
+            </select>
+          </label>
+          <div class="row">
+            <button id="recPrev" class="button">Prev</button>
+            <span id="recPageLabel" class="label">Page 1</span>
+            <button id="recNext" class="button">Next</button>
+          </div>
+        </div>
+        <div class="form-row" style="margin-top:8px;">
+          <label class="grow">
+            <span class="label">Search (DB)</span>
+            <input id="recDbSearch" placeholder="Type name to search in DB..." />
+          </label>
+        </div>
+        <div id="recDbResults" class="row" style="gap:6px; flex-wrap:wrap; margin-top:6px;"></div>
+        <div class="table-wrap" style="margin-top:10px;">
+          <table id="recipientsTable">
+            <thead>
+              <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="hint">Tip: Use <code class="pre" style="display:inline-block;padding:2px 6px;">userDataDir</code> for a logged‑in Chrome profile to avoid CAPTCHA.</p>
+      </section>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <span>© SnapBot</span>
+  </footer>
+
+  <a id="backToTop" class="button back-to-top" href="#" aria-label="Back to top">Top</a>
+
+  <!-- Run Sample Modal -->
+  <div class="modal" id="runModal" hidden>
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="runModalTitle">
+      <header class="modal-header">
+        <h3 id="runModalTitle">Run Sample</h3>
+        <button class="modal-close" data-close aria-label="Close">&times;</button>
+      </header>
+      <div class="modal-body">
+        <div class="form-row">
+          <label>
+            <span class="label">Method</span>
+            <input id="runMethod" readonly />
+          </label>
+          <label class="grow">
+            <span class="label">Path</span>
+            <input id="runPath" readonly />
+          </label>
+        </div>
+        <div class="warning hint" id="runWarning" hidden></div>
+        <div class="form-row">
+          <label class="grow">
+            <span class="label">Payload (JSON)</span>
+            <textarea id="runPayload" rows="10" spellcheck="false"></textarea>
+          </label>
+          <div>
+            <button id="copyPayloadBtn" type="button" class="button">Copy Payload</button>
+          </div>
+        </div>
+        <div class="form-row">
+          <pre id="runResult" class="pre" style="flex:1 1 auto;"></pre>
+          <div>
+            <button id="copyResultBtn" type="button" class="button">Copy Result</button>
+          </div>
+        </div>
+      </div>
+      <footer class="modal-footer">
+        <button class="button" data-close>Cancel</button>
+        <button id="runSendBtn" class="button primary">Send</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Job Logs Modal -->
+  <div class="modal" id="logsModal" hidden>
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="logsTitle">
+      <header class="modal-header">
+        <h3 id="logsTitle">Job Logs</h3>
+        <button class="modal-close" data-close aria-label="Close">&times;</button>
+      </header>
+      <div class="modal-body">
+        <div class="form-row">
+          <label class="grow">
+            <span class="label">Job ID</span>
+            <input id="logsJobId" readonly />
+          </label>
+        </div>
+        <div class="logs-controls" style="margin-bottom:12px;">
+          <label class="small">
+            <span class="label">Level</span>
+            <select id="logsLevel" class="select">
+              <option value="">All</option>
+              <option value="info">info</option>
+              <option value="warn">warn</option>
+              <option value="error">error</option>
+              <option value="debug">debug</option>
+            </select>
+          </label>
+          <label>
+            <span class="label">Search</span>
+            <input id="logsSearch" placeholder="e.g. failed, recipient" />
+          </label>
+          <label class="small">
+            <span class="label">Auto-scroll</span>
+            <select id="logsAutoscroll" class="select">
+              <option value="on" selected>On</option>
+              <option value="off">Off</option>
+            </select>
+          </label>
+          <div class="row" style="grid-column: 1 / -1;">
+            <button id="logsClearBtn" class="button">Clear</button>
+            <span class="hint">Use filters to refine the stream. Export downloads the currently visible lines.</span>
+          </div>
+        </div>
+        <pre id="logsStream" class="pre" style="max-height:340px;"></pre>
+      </div>
+      <footer class="modal-footer">
+        <button id="logsExportBtn" class="button">Export</button>
+        <button class="button" data-close>Close</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Job Details Modal -->
+  <div class="modal" id="jobModal" hidden>
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="jobTitle">
+      <header class="modal-header">
+        <h3 id="jobTitle">Job Details</h3>
+        <button class="modal-close" data-close aria-label="Close">&times;</button>
+      </header>
+      <div class="modal-body">
+        <div class="form-row">
+          <label>
+            <span class="label">Job ID</span>
+            <input id="jobDetId" readonly />
+          </label>
+          <label>
+            <span class="label">Type</span>
+            <input id="jobDetType" readonly />
+          </label>
+          <label>
+            <span class="label">Status</span>
+            <input id="jobDetStatus" readonly />
+          </label>
+        </div>
+        <div class="table-wrap" style="margin-top:10px;">
+          <table id="runsTable">
+            <thead>
+              <tr>
+                <th>Run ID</th>
+                <th>Started</th>
+                <th>Finished</th>
+                <th>Status</th>
+                <th>Error</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      <footer class="modal-footer">
+        <button id="jobLogsBtn" class="button">View Logs</button>
+        <button class="button" data-close>Close</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Callback Details Modal -->
+  <div class="modal" id="cbModal" hidden>
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="cbTitle">
+      <header class="modal-header">
+        <h3 id="cbTitle">Callback Event</h3>
+        <button class="modal-close" data-close aria-label="Close">&times;</button>
+      </header>
+      <div class="modal-body">
+        <div class="form-row">
+          <label>
+            <span class="label">Event ID</span>
+            <input id="cbId" readonly />
+          </label>
+          <label>
+            <span class="label">Job ID</span>
+            <input id="cbJobId" readonly />
+          </label>
+          <label class="grow">
+            <span class="label">URL</span>
+            <input id="cbUrl" />
+          </label>
+        </div>
+        <div class="form-row">
+          <label class="grow">
+            <span class="label">Payload (JSON)</span>
+            <textarea id="cbPayload" rows="10" spellcheck="false"></textarea>
+          </label>
+        </div>
+        <div class="form-row">
+          <div class="grow">
+            <h4 style="margin:0 0 6px 0;">Attempt History</h4>
+            <div class="table-wrap">
+              <table id="cbDeliveries">
+                <thead>
+                  <tr>
+                    <th>Attempt</th>
+                    <th>Status</th>
+                    <th>HTTP</th>
+                    <th>Error</th>
+                    <th>Sent At</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="hint" id="cbHeadersHint" style="margin-top:6px;">Headers: X-Job-Id and X-Signature (if CALLBACK_HMAC_SECRET is configured)</div>
+          </div>
+        </div>
+      </div>
+      <footer class="modal-footer">
+        <button id="cbResubmitBtn" class="button primary">Resubmit</button>
+        <button class="button" data-close>Close</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -22,16 +22,7 @@ async function sendSnap() {
     // userDataDir:
     //   "C:\\Users\\your_name\\AppData\\Local\\Google\\Chrome\\User Data\\Default",
   });
-
-  const isLogged = await bot.isLogged();
-
-  if (!isLogged) {
-    await bot.login(credentials);
-  } else {
-    console.log("Bot is already Logged in");
-  }
-
-  await bot.handlePopup();
+  await bot.ensureLoggedIn(credentials, { handlePopup: true, retry: 1 });
   await bot.captureSnap({ caption: "Hello world" });
   await bot.screenshot({ path: "screenshot.png" });
   await bot.send("BestFriends");  // or bot.useShortcut([)

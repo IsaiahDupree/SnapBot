@@ -3,14 +3,37 @@
   "version": "1.0.0",
   "description": "A bot that automates snapchat ",
   "main": "index.js",
-  "devDependencies": {},
+  "devDependencies": {
+    "supabase": "^2.53.6",
+    "supertest": "^6.3.4"
+  },
   "type": "module",
   "scripts": {
-    "bot": "node index.js"
+    "bot": "node index.js",
+    "migrate": "node scripts/migrate.js",
+    "db:health": "node scripts/dbHealth.js",
+    "api": "node api/server.js",
+    "test:repo": "node scripts/repoSmoke.js",
+    "api:smoke": "node scripts/apiSmoke.js",
+    "test:api": "set TEST_MODE=1&& node --test tests/api.spec.js",
+    "test:ui": "set TEST_MODE=1&& node --test tests/ui.screenshot.test.js",
+    "test:security": "set TEST_MODE=1&& node --test tests/security.spec.js",
+    "test:performance": "node --test tests/performance.spec.js",
+    "test:integration": "node --test tests/integration.spec.js",
+    "test:workflow": "node --test tests/workflow.spec.js",
+    "test:system": "set TEST_MODE=1&& node --test tests/system.spec.js",
+    "test:efficiency": "node --test tests/efficiency.spec.js",
+    "test:snapchat": "node --test tests/real_snapchat.spec.js",
+    "test:all": "npm run test:security && npm run test:system && npm run test:api && npm run test:ui && npm run test:performance && npm run test:integration && npm run test:workflow && npm run test:efficiency",
+    "test": "npm run test:api && npm run test:ui"
   },
   "author": "Roger Rodrigues",
   "dependencies": {
     "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "node-fetch": "^3.3.2",
+    "pg": "^8.11.5",
+    "pino": "^9.0.0",
     "puppeteer": "^24.1.1",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2"
