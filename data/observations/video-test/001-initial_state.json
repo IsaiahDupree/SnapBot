@@ -1,0 +1,156 @@
+{
+  "timestamp": "2025-11-26T06-00-46-164Z",
+  "action": "initial_state",
+  "url": "https://www.snapchat.com/web",
+  "buttons": [
+    {
+      "text": "",
+      "title": "",
+      "ariaLabel": null,
+      "className": "D8ovh",
+      "visible": true,
+      "x": 12,
+      "y": 12
+    },
+    {
+      "text": "",
+      "title": "New Chat",
+      "ariaLabel": null,
+      "className": "n6VkK eKaL7 Bnaur zUzvu",
+      "visible": true,
+      "x": 64,
+      "y": 12
+    },
+    {
+      "text": "",
+      "title": "",
+      "ariaLabel": "Destiny I",
+      "className": "DV8P1",
+      "visible": true,
+      "x": 14,
+      "y": 701.5
+    },
+    {
+      "text": "",
+      "title": "",
+      "ariaLabel": "Rista Kae 🌏♍️",
+      "className": "DV8P1",
+      "visible": true,
+      "x": 14,
+      "y": 1071.5
+    },
+    {
+      "text": "",
+      "title": "",
+      "ariaLabel": "Keke DaBratt💋🦋",
+      "className": "DV8P1",
+      "visible": true,
+      "x": 14,
+      "y": 1219.5
+    },
+    {
+      "text": "",
+      "title": "",
+      "ariaLabel": null,
+      "className": "tTyKn DjPBk eKaL7 Bnaur",
+      "visible": true,
+      "x": 303.453125,
+      "y": 25.046875
+    },
+    {
+      "text": "🔥",
+      "title": "",
+      "ariaLabel": null,
+      "className": "c47Sk",
+      "visible": true,
+      "x": 307.453125,
+      "y": 80.046875
+    },
+    {
+      "text": "🎼",
+      "title": "",
+      "ariaLabel": null,
+      "className": "c47Sk",
+      "visible": true,
+      "x": 355.375,
+      "y": 80.046875
+    },
+    {
+      "text": "",
+      "title": "Close snap preview and return to camera.",
+      "ariaLabel": null,
+      "className": "xHw7V T0LP0 STlkX",
+      "visible": true,
+      "x": 303.453125,
+      "y": 25.046875
+    },
+    {
+      "text": "",
+      "title": "Add a caption",
+      "ariaLabel": null,
+      "className": "xHw7V T0LP0",
+      "visible": true,
+      "x": 532.53125,
+      "y": 28.046875
+    },
+    {
+      "text": "",
+      "title": "Mute",
+      "ariaLabel": null,
+      "className": "ccUs0",
+      "visible": true,
+      "x": 532.53125,
+      "y": 64.046875
+    },
+    {
+      "text": "Download",
+      "title": "Download your Snap.",
+      "ariaLabel": null,
+      "className": "YatIx G9yiL eKaL7 Bnaur",
+      "visible": true,
+      "x": 303.453125,
+      "y": 538.953125
+    },
+    {
+      "text": "Send To",
+      "title": "",
+      "ariaLabel": null,
+      "className": "YatIx fGS78 eKaL7 Bnaur",
+      "visible": true,
+      "x": 440,
+      "y": 538.953125
+    },
+    {
+      "text": "",
+      "title": "",
+      "ariaLabel": "DriiBaee 💋💁🏽",
+      "className": "DV8P1",
+      "visible": true,
+      "x": 729,
+      "y": 246
+    },
+    {
+      "text": "",
+      "title": "",
+      "ariaLabel": null,
+      "className": "cYbyK hw3Mb qRNqg",
+      "visible": true,
+      "x": 729,
+      "y": 302
+    }
+  ],
+  "inputs": [
+    {
+      "type": "text",
+      "accept": "",
+      "id": "",
+      "visible": false
+    },
+    {
+      "type": "text",
+      "accept": "",
+      "id": "",
+      "visible": true
+    }
+  ]
+}

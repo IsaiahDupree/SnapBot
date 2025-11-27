@@ -214,3 +214,112 @@ export async function listJobsFiltered({ status = null, limit = 20, offset = 0 }
   );
   return r.rows;
 }
+
+// Story Posts & Analytics
+export async function createStoryPost({ storyType, mediaPath, mediaType, caption, durationSeconds, metadata = null }) {
+  const id = uuid();
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+  await pool.query(
+    `INSERT INTO story_posts (id, story_type, media_path, media_type, caption, duration_seconds, expires_at, metadata)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+    [id, storyType, mediaPath, mediaType, caption, durationSeconds, expiresAt, metadata]
+  );
+  // Create analytics record
+  await pool.query(
+    'INSERT INTO story_analytics (story_post_id) VALUES ($1)',
+    [id]
+  );
+  return { id };
+}
+
+export async function getStoryPost(id) {
+  const r = await pool.query('SELECT * FROM story_posts WHERE id=$1', [id]);
+  return r.rows[0] || null;
+}
+
+export async function listStoryPosts({ storyType = null, isActive = true, limit = 50 } = {}) {
+  let query = 'SELECT * FROM story_posts WHERE 1=1';
+  const params = [];
+  let paramIndex = 1;
+
+  if (storyType) {
+    query += ` AND story_type=$${paramIndex++}`;
+    params.push(storyType);
+  }
+  if (isActive !== null) {
+    query += ` AND is_active=$${paramIndex++}`;
+    params.push(isActive);
+  }
+  query += ` ORDER BY posted_at DESC LIMIT $${paramIndex}`;
+  params.push(limit);
+
+  const r = await pool.query(query, params);
+  return r.rows;
+}
+
+export async function updateStoryAnalytics(storyPostId, updates) {
+  const fields = [];
+  const values = [storyPostId];
+  let paramIndex = 2;
+
+  for (const [key, value] of Object.entries(updates)) {
+    fields.push(`${key}=$${paramIndex++}`);
+    values.push(value);
+  }
+
+  if (fields.length === 0) return;
+
+  fields.push(`last_updated_at=NOW()`);
+  const query = `UPDATE story_analytics SET ${fields.join(', ')} WHERE story_post_id=$1`;
+  await pool.query(query, values);
+}
+
+export async function getStoryAnalytics(storyPostId) {
+  const r = await pool.query('SELECT * FROM story_analytics WHERE story_post_id=$1', [storyPostId]);
+  return r.rows[0] || null;
+}
+
+export async function addStoryViewer(storyPostId, viewerName, { watchDuration = null, tookScreenshot = false, shared = false } = {}) {
+  const id = uuid();
+  await pool.query(
+    `INSERT INTO story_viewers (id, story_post_id, viewer_name, watch_duration_seconds, took_screenshot, shared)
+     VALUES ($1, $2, $3, $4, $5, $6)
+     ON CONFLICT (story_post_id, viewer_name) 
+     DO UPDATE SET 
+       viewed_at=NOW(),
+       watch_duration_seconds=COALESCE($4, story_viewers.watch_duration_seconds),
+       took_screenshot=$5 OR story_viewers.took_screenshot,
+       shared=$6 OR story_viewers.shared`,
+    [id, storyPostId, viewerName, watchDuration, tookScreenshot, shared]
+  );
+  return { id };
+}
+
+export async function getStoryViewers(storyPostId, limit = 100) {
+  const r = await pool.query(
+    'SELECT * FROM story_viewers WHERE story_post_id=$1 ORDER BY viewed_at DESC LIMIT $2',
+    [storyPostId, limit]
+  );
+  return r.rows;
+}
+
+export async function createEngagementSnapshot(storyPostId) {
+  const analytics = await getStoryAnalytics(storyPostId);
+  if (!analytics) return null;
+
+  const id = uuid();
+  await pool.query(
+    `INSERT INTO story_engagement_snapshots (id, story_post_id, views, likes, shares, comments)
+     VALUES ($1, $2, $3, $4, $5, $6)`,
+    [id, storyPostId, analytics.total_views, analytics.total_likes, analytics.total_shares, analytics.total_comments]
+  );
+  return { id };
+}
+
+export async function getEngagementHistory(storyPostId, limit = 50) {
+  const r = await pool.query(
+    'SELECT * FROM story_engagement_snapshots WHERE story_post_id=$1 ORDER BY snapshot_at DESC LIMIT $2',
+    [storyPostId, limit]
+  );
+  return r.rows;
+}

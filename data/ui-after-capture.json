@@ -1,0 +1,567 @@
+{
+  "buttons": [
+    {
+      "index": 0,
+      "tagName": "BUTTON",
+      "id": "downshift-0-toggle-button",
+      "className": "D8ovh",
+      "title": null,
+      "ariaLabel": null,
+      "type": "button",
+      "textContent": null,
+      "visible": true,
+      "disabled": false,
+      "parentClass": "Titq2 FBTDE",
+      "hasSVG": true,
+      "svgTitle": null,
+      "rect": {
+        "top": 12,
+        "left": 12,
+        "width": 36,
+        "height": 36
+      }
+    },
+    {
+      "index": 1,
+      "tagName": "BUTTON",
+      "id": null,
+      "className": "kwuI_ kwuI_ eKaL7 Bnaur zUzvu",
+      "title": "View friend requests",
+      "ariaLabel": null,
+      "type": "button",
+      "textContent": null,
+      "visible": false,
+      "disabled": false,
+      "parentClass": "KcY9t",
+      "hasSVG": true,
+      "svgTitle": null,
+      "rect": {
+        "top": 0,
+        "left": 0,
+        "width": 0,
+        "height": 0
+      }
+    },
+    {
+      "index": 2,
+      "tagName": "BUTTON",
+      "id": null,
+      "className": "n6VkK eKaL7 Bnaur zUzvu",
+      "title": "New Chat",
+      "ariaLabel": null,
+      "type": "button",
+      "textContent": null,
+      "visible": true,
+      "disabled": false,
+      "parentClass": "LsbRg",
+      "hasSVG": true,
+      "svgTitle": null,
+      "rect": {
+        "top": 12,
+        "left": 64,
+        "width": 36,
+        "height": 36
+      }
+    },
+    {
+      "index": 3,
+      "tagName": "BUTTON",
+      "id": null,
+      "className": "Vhq_T",
+      "title": null,
+      "ariaLabel": "Send this text to MyAI",
+      "type": "button",
+      "textContent": "My AI",
+      "visible": false,
+      "disabled": false,
+      "parentClass": "_S446",
+      "hasSVG": true,
+      "svgTitle": null,
+      "rect": {
+        "top": 0,
+        "left": 0,
+        "width": 0,
+        "height": 0
+      }
+    },
+    {
+      "index": 4,
+      "tagName": "BUTTON",
+      "id": null,
+      "className": "DV8P1",
+      "title": null,
+      "ariaLabel": "Hoedawgg DOES IT",
+      "type": "button",
+      "textContent": null,
+      "visible": true,
+      "disabled": false,
+      "parentClass": "LNwMF",
+      "hasSVG": false,
+      "svgTitle": null,
+      "rect": {
+        "top": 366.5,
+        "left": 14,
+        "width": 54,
+        "height": 54
+      }
+    },
+    {
+      "index": 5,
+      "tagName": "BUTTON",
+      "id": null,
+      "className": "DV8P1",
+      "title": null,
+      "ariaLabel": "Marina Emilyy👑",
+      "type": "button",
+      "textContent": null,
+      "visible": true,
+      "disabled": false,
+      "parentClass": "LNwMF",
+      "hasSVG": false,
+      "svgTitle": null,
+      "rect": {
+        "top": 514.5,
+        "left": 14,
+        "width": 54,
+        "height": 54
+      }
+    },
+    {
+      "index": 6,
+      "tagName": "BUTTON",
+      "id": null,
+      "className": "DV8P1",
+      "title": null,
+      "ariaLabel": "JamieO🐹 Hamstachick",
+      "type": "button",
+      "textContent": null,
+      "visible": true,
+      "disabled": false,
+      "parentClass": "LNwMF",
+      "hasSVG": false,
+      "svgTitle": null,
+      "rect": {
+        "top": 810.5,
+        "left": 14,
+        "width": 54,
+        "height": 54
+      }
+    },
+    {
+      "index": 7,
+      "tagName": "BUTTON",
+      "id": null,
+      "className": "qJKfS",
+      "title": null,
+      "ariaLabel": null,
+      "type": "button",
+      "textContent": null,
+      "visible": true,
+      "disabled": false,
+      "parentClass": "Jq_5_",
+      "hasSVG": true,
+      "svgTitle": null,
+      "rect": {
+        "top": 169.09375,
+        "left": 354.09375,
+        "width": 163.796875,
+        "height": 163.796875
+      }
+    },
+    {
+      "index": 8,
+      "tagName": "BUTTON",
+      "id": null,
+      "className": "FBYjn gK0xL W5dIq",
+      "title": null,
+      "ariaLabel": null,
+      "type": "button",
+      "textContent": null,
+      "visible": true,
+      "disabled": false,
+      "parentClass": "i0KT7",
+      "hasSVG": false,
+      "svgTitle": null,
+      "rect": {
+        "top": 430,
+        "left": 413,
+        "width": 48,
+        "height": 48
+      }
+    },
+    {
+      "index": 9,
+      "tagName": "BUTTON",
+      "id": null,
+      "className": "FBYjn",
+      "title": ".5 Classic",
+      "ariaLabel": null,
+      "type": "button",
+      "textContent": null,
+      "visible": true,
+      "disabled": false,
+      "parentClass": "i0KT7",
+      "hasSVG": false,
+      "svgTitle": null,
+      "rect": {
+        "top": 436,
+        "left": 473,
+        "width": 36,
+        "height": 36
+      }
+    },
+    {
+      "index": 10,
+      "tagName": "BUTTON",
+      "id": null,
+      "className": "FBYjn",
+      "title": "Cute Freckles",
+      "ariaLabel": null,
+      "type": "button",
+      "textContent": null,
+      "visible": true,
+      "disabled": false,
+      "parentClass": "i0KT7",
+      "hasSVG": false,
+      "svgTitle": null,
+      "rect": {
+        "top": 436,
+        "left": 521,
+        "width": 36,
+        "height": 36
+      }
+    },
+    {
+      "index": 11,
+      "tagName": "BUTTON",
+      "id": null,
+      "className": "FBYjn",
+      "title": "Angry Face",
+      "ariaLabel": null,
+      "type": "button",
+      "textContent": null,
+      "visible": true,
+      "disabled": false,
+      "parentClass": "i0KT7",
+      "hasSVG": false,
+      "svgTitle": null,
+      "rect": {
+        "top": 436,
+        "left": 569,
+        "width": 36,
+        "height": 36
+      }
+    },
+    {
+      "index": 12,
+      "tagName": "BUTTON",
+      "id": null,
+      "className": "K83Ra",
+      "title": null,
+      "ariaLabel": null,
+      "type": "button",
+      "textContent": null,
+      "visible": true,
+      "disabled": false,
+      "parentClass": "BN1L1 evmU8 ngwnc",
+      "hasSVG": true,
+      "svgTitle": null,
+      "rect": {
+        "top": 92,
+        "left": 501,
+        "width": 52,
+        "height": 52
+      }
+    },
+    {
+      "index": 13,
+      "tagName": "BUTTON",
+      "id": null,
+      "className": "DV8P1",
+      "title": null,
+      "ariaLabel": "Destiny I",
+      "type": "button",
+      "textContent": null,
+      "visible": true,
+      "disabled": false,
+      "parentClass": "cYbyK",
+      "hasSVG": false,
+      "svgTitle": null,
+      "rect": {
+        "top": 246,
+        "left": 729,
+        "width": 52,
+        "height": 52
+      }
+    },
+    {
+      "index": 14,
+      "tagName": "BUTTON",
+      "id": null,
+      "className": "cYbyK hw3Mb qRNqg",
+      "title": null,
+      "ariaLabel": null,
+      "type": "button",
+      "textContent": null,
+      "visible": true,
+      "disabled": false,
+      "parentClass": "OwWqx",
+      "hasSVG": true,
+      "svgTitle": null,
+      "rect": {
+        "top": 302,
+        "left": 729,
+        "width": 52,
+        "height": 52
+      }
+    },
+    {
+      "index": "div-0",
+      "tagName": "DIV[role=\"button\"]",
+      "id": null,
+      "className": "O4POs",
+      "title": null,
+      "ariaLabel": null,
+      "textContent": "Team SnapchatOpened·1h",
+      "visible": true,
+      "parentClass": null,
+      "hasSVG": true,
+      "svgTitle": null,
+      "rect": {
+        "top": 61,
+        "left": 0,
+        "width": 82,
+        "height": 74
+      }
+    },
+    {
+      "index": "div-1",
+      "tagName": "DIV[role=\"button\"]",
+      "id": null,
+      "className": "O4POs",
+      "title": null,
+      "ariaLabel": null,
+      "textContent": "💕- > Sarah < - AshleyReceived·1d",
+      "visible": true,
+      "parentClass": null,
+      "hasSVG": true,
+      "svgTitle": null,
+      "rect": {
+        "top": 135,
+        "left": 0,
+        "width": 82,
+        "height": 74
+      }
+    },
+    {
+      "index": "div-2",
+      "tagName": "DIV[role=\"button\"]",
+      "id": null,
+      "className": "O4POs",
+      "title": null,
+      "ariaLabel": null,
+      "textContent": "Quincy Received·Nov 14",
+      "visible": true,
+      "parentClass": null,
+      "hasSVG": true,
+      "svgTitle": null,
+      "rect": {
+        "top": 209,
+        "left": 0,
+        "width": 82,
+        "height": 74
+      }
+    },
+    {
+      "index": "div-3",
+      "tagName": "DIV[role=\"button\"]",
+      "id": null,
+      "className": "O4POs",
+      "title": null,
+      "ariaLabel": null,
+      "textContent": "DesCalled",
+      "visible": true,
+      "parentClass": null,
+      "hasSVG": true,
+      "svgTitle": null,
+      "rect": {
+        "top": 283,
+        "left": 0,
+        "width": 82,
+        "height": 74
+      }
+    },
+    {
+      "index": "div-4",
+      "tagName": "DIV[role=\"button\"]",
+      "id": null,
+      "className": "O4POs",
+      "title": null,
+      "ariaLabel": null,
+      "textContent": "Hoedawgg DOES ITReceived·Nov 7",
+      "visible": true,
+      "parentClass": null,
+      "hasSVG": true,
+      "svgTitle": null,
+      "rect": {
+        "top": 357,
+        "left": 0,
+        "width": 82,
+        "height": 74
+      }
+    },
+    {
+      "index": "div-5",
+      "tagName": "DIV[role=\"button\"]",
+      "id": null,
+      "className": "O4POs",
+      "title": null,
+      "ariaLabel": null,
+      "textContent": "MelvinCalled",
+      "visible": true,
+      "parentClass": null,
+      "hasSVG": true,
+      "svgTitle": null,
+      "rect": {
+        "top": 431,
+        "left": 0,
+        "width": 82,
+        "height": 74
+      }
+    },
+    {
+      "index": "div-6",
+      "tagName": "DIV[role=\"button\"]",
+      "id": null,
+      "className": "O4POs",
+      "title": null,
+      "ariaLabel": null,
+      "textContent": "Marina Emilyy👑Opened·Nov 7",
+      "visible": true,
+      "parentClass": null,
+      "hasSVG": true,
+      "svgTitle": null,
+      "rect": {
+        "top": 505,
+        "left": 0,
+        "width": 82,
+        "height": 74
+      }
+    },
+    {
+      "index": "div-7",
+      "tagName": "DIV[role=\"button\"]",
+      "id": null,
+      "className": "O4POs",
+      "title": null,
+      "ariaLabel": null,
+      "textContent": "brooklyn🐢Received·Sep 24",
+      "visible": true,
+      "parentClass": null,
+      "hasSVG": true,
+      "svgTitle": null,
+      "rect": {
+        "top": 579,
+        "left": 0,
+        "width": 82,
+        "height": 74
+      }
+    },
+    {
+      "index": "div-8",
+      "tagName": "DIV[role=\"button\"]",
+      "id": null,
+      "className": "O4POs",
+      "title": null,
+      "ariaLabel": null,
+      "textContent": "JARRODReceived·Sep 11",
+      "visible": true,
+      "parentClass": null,
+      "hasSVG": true,
+      "svgTitle": null,
+      "rect": {
+        "top": 653,
+        "left": 0,
+        "width": 82,
+        "height": 74
+      }
+    },
+    {
+      "index": "div-9",
+      "tagName": "DIV[role=\"button\"]",
+      "id": null,
+      "className": "O4POs",
+      "title": null,
+      "ariaLabel": null,
+      "textContent": "ChristianReceived·Sep 4",
+      "visible": true,
+      "parentClass": null,
+      "hasSVG": true,
+      "svgTitle": null,
+      "rect": {
+        "top": 727,
+        "left": 0,
+        "width": 82,
+        "height": 74
+      }
+    },
+    {
+      "index": "div-10",
+      "tagName": "DIV[role=\"button\"]",
+      "id": null,
+      "className": "O4POs",
+      "title": null,
+      "ariaLabel": null,
+      "textContent": "JamieO🐹 HamstachickReceived·Sep 3",
+      "visible": true,
+      "parentClass": null,
+      "hasSVG": true,
+      "svgTitle": null,
+      "rect": {
+        "top": 801,
+        "left": 0,
+        "width": 82,
+        "height": 74
+      }
+    },
+    {
+      "index": "div-11",
+      "tagName": "DIV[role=\"button\"]",
+      "id": null,
+      "className": "O4POs",
+      "title": null,
+      "ariaLabel": null,
+      "textContent": "Rahmeik”Bamn Bamn” VenableReceived·Aug 30",
+      "visible": true,
+      "parentClass": null,
+      "hasSVG": true,
+      "svgTitle": null,
+      "rect": {
+        "top": 875,
+        "left": 0,
+        "width": 82,
+        "height": 74
+      }
+    },
+    {
+      "index": "div-12",
+      "tagName": "DIV[role=\"button\"]",
+      "id": null,
+      "className": "O4POs",
+      "title": null,
+      "ariaLabel": null,
+      "textContent": "Noah BeckettReceived·Jun 6",
+      "visible": true,
+      "parentClass": null,
+      "hasSVG": true,
+      "svgTitle": null,
+      "rect": {
+        "top": 949,
+        "left": 0,
+        "width": 82,
+        "height": 74
+      }
+    }
+  ],
+  "recipients": []
+}

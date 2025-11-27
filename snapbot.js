@@ -29,8 +29,8 @@ export default class SnapBot {
       this.browser = await puppeteer.launch(options);
       const cookiesPath = cookiefile
         ? (cookiefile.includes("/") || cookiefile.includes("\\")
-            ? cookiefile
-            : path.join(process.env.COOKIES_DIR || path.resolve(process.cwd(), "data", "cookies"), `${cookiefile}-cookies.json`))
+          ? cookiefile
+          : path.join(process.env.COOKIES_DIR || path.resolve(process.cwd(), "data", "cookies"), `${cookiefile}-cookies.json`))
         : null;
 
       const context = this.browser.defaultBrowserContext();
@@ -77,10 +77,10 @@ export default class SnapBot {
             if (currentVersion != lastTestedVersion) {
               console.warn(
                 `⚠️  Warning: Some methods were last tested on version ${lastTestedVersion} \n\n` +
-                  `Detected current version is ${currentVersion}\n\n` +
-                  `Some features might not work properly.\n` +
-                  `If you encounter issues, please try updating the project using 'git pull'.\n` +
-                  `If the problem persists, consider raising an issue or contacting the developer.`
+                `Detected current version is ${currentVersion}\n\n` +
+                `Some features might not work properly.\n` +
+                `If you encounter issues, please try updating the project using 'git pull'.\n` +
+                `If the problem persists, consider raising an issue or contacting the developer.`
               );
             }
           }
@@ -106,7 +106,7 @@ export default class SnapBot {
       // short wait for network to settle
       try {
         await this.page.waitForNetworkIdle({ idleTime: 500, timeout: 5000 });
-      } catch (_) {}
+      } catch (_) { }
 
       let loginField = await this.page.$(loginFieldSelector);
 
@@ -120,7 +120,7 @@ export default class SnapBot {
           await loginCandidates[0].click();
           try {
             await this.page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 30000 });
-          } catch (_) {}
+          } catch (_) { }
         } else {
           // Fallback: go straight to accounts login
           console.log("Directing to accounts login page...");
@@ -223,7 +223,7 @@ export default class SnapBot {
       if (handlePopup) {
         try {
           await this.handlePopup();
-        } catch (_) {}
+        } catch (_) { }
       }
       logged = await this.isLogged();
       if (!logged && retry > 0) {
@@ -235,7 +235,7 @@ export default class SnapBot {
       if (handlePopup) {
         try {
           await this.handlePopup();
-        } catch (_) {}
+        } catch (_) { }
       }
     }
     return logged;
@@ -420,7 +420,7 @@ export default class SnapBot {
             await this.page.click(svgButtonSelector);
             await delay(1000);
           }
-        } catch (_) {}
+        } catch (_) { }
 
         captureButton = await this.page.waitForSelector(captureButtonSelector, {
           visible: true,
@@ -501,6 +501,177 @@ export default class SnapBot {
     }
   }
 
+  // Upload a video file from the computer
+  async uploadVideo({ videoPath, caption }) {
+    try {
+      console.log('📹 Uploading video from file...');
+
+      // Dismiss any popups
+      await this.page.evaluate(() => {
+        const buttons = document.querySelectorAll('button');
+        for (const btn of buttons) {
+          if (btn.textContent?.trim() === 'Got it!') {
+            btn.click();
+            break;
+          }
+        }
+      });
+      await delay(500);
+
+      // Find file input element
+      let fileInput = await this.page.$('input[type="file"][accept*="video"]');
+      if (!fileInput) {
+        fileInput = await this.page.$('input[type="file"]');
+      }
+
+      if (!fileInput) {
+        // Try clicking gallery/upload button first
+        // Selectors based on common UI patterns, might need adjustment
+        const uploadSelectors = [
+          'button[title*="Upload"]',
+          'button[aria-label*="Upload"]',
+          'button[title*="Gallery"]',
+          'button[aria-label*="Gallery"]',
+          'button[title="Memories"]',
+          'button.gallery-button'
+        ];
+
+        for (const selector of uploadSelectors) {
+          const btn = await this.page.$(selector);
+          if (btn) {
+            await btn.click();
+            await delay(1000);
+            fileInput = await this.page.$('input[type="file"]');
+            if (fileInput) break;
+          }
+        }
+      }
+
+      if (fileInput) {
+        await fileInput.uploadFile(videoPath);
+        console.log('   ✅ Video file uploaded');
+        await delay(5000); // Wait for video to process
+      } else {
+        throw new Error('Could not find file input element');
+      }
+
+      // Add caption if provided
+      if (caption) {
+        const captionBtn = await this.page.$('button.eUb32[title="Add a caption"]');
+        if (captionBtn) {
+          await captionBtn.click();
+          await delay(500);
+          const textareaSelector = 'textarea.B9QiX[aria-label="Caption Input"]';
+          await this.page.waitForSelector(textareaSelector, { visible: true });
+          await this.page.type(textareaSelector, caption, { delay: 50 });
+          console.log('   ✅ Caption added');
+        }
+      }
+
+      console.log('✅ Video ready to send!');
+      return true;
+
+    } catch (error) {
+      console.error('❌ Error uploading video:', error);
+      throw error;
+    }
+  }
+
+  // Post to My Story
+  async postToMyStory() {
+    try {
+      console.log("Looking for story send button...");
+      const button = await this.page.$("button.YatIx.fGS78.eKaL7.Bnaur");
+
+      if (button) {
+        await button.click();
+        await delay(1000);
+
+        // Look for "My Story" option
+        const myStorySelector = "div[aria-label='My Story'], button[title='My Story'], div:has-text('My Story')";
+        const myStoryButton = await this.page.$(myStorySelector);
+
+        if (myStoryButton) {
+          await myStoryButton.click();
+          console.log("✅ Selected My Story");
+        } else {
+          // Fallback: click first story option (usually My Story)
+          const storyOptions = await this.page.$$("ul.UxcmY li div");
+          if (storyOptions && storyOptions.length > 0) {
+            await storyOptions[0].click();
+            console.log("✅ Selected first story option (likely My Story)");
+          }
+        }
+
+        await delay(500);
+        const sendButton = await this.page.$("button[type='submit']");
+        if (sendButton) {
+          await sendButton.click();
+          console.log("✅ Posted to My Story!");
+          await delay(2000);
+        }
+      } else {
+        throw new Error("Send button not found");
+      }
+    } catch (error) {
+      console.error("Error posting to My Story:", error);
+      throw error;
+    }
+  }
+
+  // Post to Spotlight
+  async postToSpotlight() {
+    try {
+      console.log("Looking for story send button...");
+      const button = await this.page.$("button.YatIx.fGS78.eKaL7.Bnaur");
+
+      if (button) {
+        await button.click();
+        await delay(1000);
+
+        // Look for "Spotlight" or "Public" option
+        const spotlightSelectors = [
+          "div[aria-label='Spotlight']",
+          "button[title='Spotlight']",
+          "div:has-text('Spotlight')",
+          "div:has-text('Public Story')"
+        ];
+
+        let spotlightButton = null;
+        for (const selector of spotlightSelectors) {
+          spotlightButton = await this.page.$(selector);
+          if (spotlightButton) break;
+        }
+
+        if (spotlightButton) {
+          await spotlightButton.click();
+          console.log("✅ Selected Spotlight");
+        } else {
+          // Fallback: look in list items
+          const storyOptions = await this.page.$$("ul.UxcmY li div");
+          // Spotlight is usually second or third option
+          if (storyOptions && storyOptions.length > 1) {
+            await storyOptions[1].click();
+            console.log("✅ Selected secondary story option (possibly Spotlight)");
+          }
+        }
+
+        await delay(500);
+        const sendButton = await this.page.$("button[type='submit']");
+        if (sendButton) {
+          await sendButton.click();
+          console.log("✅ Posted to Spotlight!");
+          await delay(2000);
+        }
+      } else {
+        throw new Error("Send button not found");
+      }
+    } catch (error) {
+      console.error("Error posting to Spotlight:", error);
+      throw error;
+    }
+  }
+
   // Select and send to specific recipients by display name
   async sendToRecipients(names = []) {
     if (!Array.isArray(names) || names.length === 0) {
@@ -563,7 +734,7 @@ export default class SnapBot {
       }
 
       // Go back to the list (click title again)
-      try { await titleSpan.click(); } catch (_) {}
+      try { await titleSpan.click(); } catch (_) { }
       await delay(300);
     }
   }
@@ -691,7 +862,7 @@ export default class SnapBot {
   async saveCookies(username) {
     try {
       const dir = process.env.COOKIES_DIR || path.resolve(process.cwd(), "data", "cookies");
-      try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {}
+      try { fs.mkdirSync(dir, { recursive: true }); } catch (_) { }
       const cookies = await this.page.cookies("https://web.snapchat.com");
       const filePath = path.join(dir, `${username}-cookies.json`);
       fs.writeFileSync(filePath, JSON.stringify(cookies, null, 2));
@@ -802,9 +973,9 @@ export default class SnapBot {
         const statusContainer = await listItem.$(`#status-${cleanedID}`);
         const statusParent = statusContainer
           ? await this.page.evaluateHandle(
-              (el) => el.parentElement,
-              statusContainer
-            )
+            (el) => el.parentElement,
+            statusContainer
+          )
           : null;
         let status = [];
 
@@ -962,13 +1133,13 @@ export default class SnapBot {
       if (!logged) throw new Error("Login not confirmed");
 
       await this.recordVideo({ caption, durationMs });
-    if (Array.isArray(recipients) && recipients.length > 0) {
-      await this.sendToRecipients(recipients);
-    } else {
-      await this.send(category);
-    }
+      if (Array.isArray(recipients) && recipients.length > 0) {
+        await this.sendToRecipients(recipients);
+      } else {
+        await this.send(category);
+      }
     } finally {
-      try { await this.closeBrowser(); } catch (_) {}
+      try { await this.closeBrowser(); } catch (_) { }
     }
   }
   static extend(methods) {
