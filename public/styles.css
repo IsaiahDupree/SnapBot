@@ -1,0 +1,102 @@
+* { box-sizing: border-box; }
+/* Light theme (default) */
+:root {
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #475569;
+  --accent: #16a34a;
+  --danger: #b91c1c;
+  --border: #e5e7eb;
+  --tableHeadBg: #f1f5f9;
+}
+/* Dark theme */
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --card: #111827;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --accent: #22c55e;
+  --danger: #ef4444;
+  --border: #1f2937;
+  --tableHeadBg: #0e1626;
+}
+html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--card); position: sticky; top: 0; z-index: 10; }
+.topbar h1 { margin: 0; font-size: 18px; }
+.topbar .actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.topbar .actions button { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 6px; cursor: pointer; }
+.theme-label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
+.theme-label select { background: var(--card); color: var(--text); border: 1px solid var(--border); padding: 6px 8px; border-radius: 6px; }
+.topbar .actions button:hover { border-color: var(--accent); }
+.container { max-width: 1100px; margin: 16px auto; padding: 0 12px; display: grid; grid-template-columns: repeat(auto-fill,minmax(320px,1fr)); gap: 16px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+.card h2 { margin: 4px 0 12px 0; font-size: 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: default; }
+.card h2 .collapse { background: transparent; border: 1px solid var(--border); border-radius: 6px; padding: 2px 6px; cursor: pointer; }
+.card h3 { margin: 10px 0 8px 0; font-size: 14px; color: var(--muted); }
+.table-wrap { overflow: auto; max-height: 360px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); }
+table { border-collapse: collapse; width: 100%; min-width: 520px; }
+th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; font-size: 13px; }
+th { position: sticky; top: 0; background: var(--tableHeadBg); }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; border: 1px solid var(--border); }
+.badge.ok { color: #10b981; border-color: #10b98133; background: #10b9811a; }
+.badge.fail { color: var(--danger); border-color: #ef444433; background: #ef44441a; }
+.filters { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+ul { list-style: none; margin: 6px 0; padding: 0; }
+li.filter-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; border: 1px solid var(--border); border-radius: 8px; }
+button.remove { background: transparent; border: 1px solid var(--border); color: var(--danger); padding: 4px 8px; border-radius: 6px; cursor: pointer; }
+.form-row { display: flex; gap: 10px; align-items: flex-end; margin-top: 12px; flex-wrap: wrap; }
+.form-row label { display: grid; gap: 6px; font-size: 12px; color: var(--muted); min-width: 160px; }
+.form-row .grow { flex: 1 1 280px; min-width: 220px; }
+.form-row button { align-self: end; }
+.form-row input, .form-row select { background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; }
+.footer { text-align: center; padding: 20px; color: var(--muted); }
+
+/* Modals */
+.modal { position: fixed; inset: 0; background: #0009; display: grid; place-items: center; }
+.modal[hidden] { display: none; }
+.modal-dialog { width: min(900px, 92vw); max-height: 90vh; background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; display: grid; grid-template-rows: auto 1fr auto; }
+.modal-header, .modal-footer { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+.modal-footer { border-top: 1px solid var(--border); border-bottom: none; display: flex; gap: 8px; justify-content: flex-end; }
+.modal-body { padding: 12px; overflow: auto; }
+.modal-close { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 6px 10px; border-radius: 6px; cursor: pointer; }
+.primary { background: var(--accent); color: #052e16; border: 1px solid #16a34a; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
+.pre { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px; overflow: auto; white-space: pre-wrap; word-break: break-word; color: var(--text); }
+.warning { color: #fbbf24; margin: 8px 0; }
+.hint { color: var(--muted); margin-top: 8px; font-size: 12px; }
+
+/* Code and inline elements */
+code { background: rgba(0,0,0,0.05); border: 1px solid var(--border); padding: 2px 6px; border-radius: 6px; }
+
+/* Utilities */
+.truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 280px; vertical-align: bottom; }
+
+/* Density support */
+[data-density="compact"] .card { padding: 10px; }
+[data-density="compact"] th, [data-density="compact"] td { padding: 6px 8px; font-size: 12px; }
+[data-density="compact"] .form-row { gap: 8px; }
+[data-density="compact"] .topbar { padding: 10px 12px; }
+[data-density="compact"] .table-wrap { max-height: 300px; }
+
+/* Collapsible cards */
+.card[data-collapsed="true"] > :not(h2) { display: none; }
+
+/* Responsive tweaks */
+@media (max-width: 1024px) {
+  .container { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 768px) {
+  .container { grid-template-columns: 1fr; }
+  .topbar h1 { font-size: 16px; }
+  table { min-width: 420px; }
+  th, td { font-size: 12px; padding: 6px 8px; }
+  .table-wrap { max-height: 300px; }
+  .form-row button { width: 100%; }
+}
+@media (max-width: 420px) {
+  table { min-width: 360px; }
+  .topbar { padding: 10px 12px; }
+  .card { padding: 10px; }
+  .form-row label { min-width: 100%; }
+  .form-row .grow { min-width: 100%; flex: 1 1 100%; }
+}

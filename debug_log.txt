@@ -1,0 +1,15 @@
+open supabase\.temp\profile: The system cannot find the file specified.
+Supabase CLI 2.53.6
+Using profile: supabase (supabase.co)
+Loading project ref from file: supabase\.temp\project-ref
+Starting database from backup...
+Starting containers...
+WARNING: Analytics on Windows requires Docker daemon exposed on tcp://localhost:2375.
+See https://supabase.com/docs/guides/local-development/cli/getting-started?queryGroups=platform&platform=windows#running-supabase-locally for more details.
+Stopping containers...
+Pruned containers: [6c0e29b7099159c65d7e453f3cd8d60eb907fa15cef16e01a2ffba98999b0343 6b8d8e6945de68fa2a80dfd70f3d1ea37c31688e895d346daef9c9f9fcdb25a3 64077d2cc8d41d84e74febe2d43251d068bb308308c088d9a165e3ae09c7b845 5d6a9f44e5d1bcb3b415e4dd149123b299c473020efb6178d083510cbc8fcd6f]
+Pruned network: [supabase_network_SnapBot]
+failed to start docker container: Error response from daemon: failed to set up container networking: driver failed programming external connectivity on endpoint supabase_kong_SnapBot (f984e96a94bd23aa31d38fa21e02e45d67ff7c8be916b32834b8595b43a1bb26): Bind for 0.0.0.0:54321 failed: port is already allocated
+
+Try stopping the running project with supabase stop --project-id youtube-comment-automation
+Or configure a different kong port in supabase\config.toml

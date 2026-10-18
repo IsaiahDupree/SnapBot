@@ -1,0 +1,12 @@
+         API URL: http://127.0.0.1:54321
+     GraphQL URL: http://127.0.0.1:54321/graphql/v1
+  S3 Storage URL: http://127.0.0.1:54321/storage/v1/s3
+         MCP URL: http://127.0.0.1:54321/mcp
+    Database URL: postgresql://postgres:postgres@127.0.0.1:65432/postgres
+      Studio URL: http://127.0.0.1:54323
+     Mailpit URL: http://127.0.0.1:54324
+ Publishable key: ${API_KEY}
+      Secret key: ${API_KEY}
+   S3 Access Key: ${API_KEY}
+   S3 Secret Key: ${API_KEY}
+       S3 Region: local
