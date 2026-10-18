@@ -1,0 +1,12 @@
+{
+  "supplements_snapshot": "a0a157dbd527bf9c-r2",
+  "source_roots": [
+    "C:/Users/Isaia/Documents/Coding/SnapChatAutomation/SnapBot"
+  ],
+  "files": {
+    "utils/sessionManager.js": {
+      "source": "C:\\Users\\Isaia\\Documents\\Coding\\SnapChatAutomation\\SnapBot\\utils\\sessionManager.js",
+      "reason": "portable authored code absent from staged source selection"
+    }
+  }
+}
